@@ -17,7 +17,7 @@ class Amazon::Iap::Client
       raise e unless renew_on_failure
             
       renewal = renew(user_id, purchase_token)
-      verify(user_id, renewal['purchaseToken'], false)
+      verify(user_id, renewal.purchase_token, false)
     end
   end
   
@@ -30,18 +30,6 @@ class Amazon::Iap::Client
   def process(path, user_id, purchase_token)
     path = "/version/2.0/#{path}/developer/#{@developer_secret}/user/#{user_id}/purchaseToken/#{purchase_token}"
     uri = URI.parse "#{@host}#{path}"
-    
-    response = Net::HTTP.get_response uri
-    
-    case response.code.to_i
-    when 200 then JSON.parse(response.body)
-    when 400 then raise Amazon::Iap::Exceptions::InvalidTransaction
-    when 496 then raise Amazon::Iap::Exceptions::InvalidSharedSecret
-    when 497 then raise Amazon::Iap::Exceptions::InvalidUserId
-    when 498 then raise Amazon::Iap::Exceptions::InvalidPurchaseToken
-    when 499 then raise Amazon::Iap::Exceptions::ExpiredCredentials
-    when 500 then raise Amazon::Iap::Exceptions::InternalError
-    else raise Amazon::Iap::Exceptions::General
-    end
+    Amazon::Iap::Result.new Net::HTTP.get_response(uri)
   end  
 end
