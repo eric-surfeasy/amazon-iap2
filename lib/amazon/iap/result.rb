@@ -5,8 +5,13 @@ class Amazon::Iap::Result
     case response.code.to_i
     when 200
       parsed = JSON.parse(response.body)
-      parsed['startTime'] = parsed['startDate'].nil? ? nil : Time.at(parsed['startDate'] / 1000)
-      parsed['endTime'] = parsed['endDate'].nil? ? nil : Time.at(parsed['endDate'] / 1000)
+      
+      if parsed.has_key? 'startDate'
+        parsed['startTime'] = parsed['startDate'].nil? ? nil : Time.at(parsed['startDate'] / 1000)
+      end
+      if parsed.has_key? 'endDate'
+        parsed['endTime'] = parsed['endDate'].nil? ? nil : Time.at(parsed['endDate'] / 1000)
+      end
       
       parsed.each do |key, value|
         underscore = key.gsub(/::/, '/').gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2').gsub(/([a-z\d])([A-Z])/, '\1_\2').tr('-', '_').downcase
