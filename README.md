@@ -28,18 +28,25 @@ for more details.
 Initialize a client, passing in the developer secret and (optionally) the host.  If a host is not
 passed, it will use Amazon's production endpoint.
 
-    client = Amazon::Iap::Client.new 'my_developer_secret', 'http://iap-staging.domain.com'
+```ruby
+client = Amazon::Iap::Client.new 'my_developer_secret', 'http://iap-staging.domain.com' # staging server
+client = Amazon::Iap::Client.new 'my_developer_secret' # production server
+```
 
 From there, you can call either `verify` or `renew` on the client and pass in the user id and purchase token:
 
-    result = client.verify 'some-user-id', 'some-purchase-token'
-    result = client.renew 'some-user-id', 'some-purchase-token'
+```ruby
+result = client.verify 'some-user-id', 'some-purchase-token'
+result = client.renew 'some-user-id', 'some-purchase-token'
+```
 
 By default, the `verify` method will automatically try to renew expired tokens, and will recall `verify`
 against the new token returned.  If you do not want this behavior, simply pass in `false` as the third
 attribute to the `verify` method:
 
-    result = client.verify 'some-user-id', 'some-purchase-token', false
+```ruby
+result = client.verify 'some-user-id', 'some-purchase-token', false
+```
 
 ## Returned Values
 
@@ -47,23 +54,27 @@ An instance of Amazon::Iap::Result is returned from both methods, the attributes
 of the hash keys returned in the JSON object.  For convenience, we also add `start_time` and `end_time` attributes
 which are `Time` representations of the milliseconds returned in `start_date` and `end_date` respectively.  E.g.,
 
-    result = client.verify 'some-user-id', 'some-purchase-token'
-    
-    result.class.name     # "Amazon::Iap::Result"
-    result.item_type      # "SUBSCRIPTION"
-    result.sku            # "some-sku"
-    result.start_date     # 1378751554943
-    result.start_time     # 2013-09-09 14:32:34 -0400 
-    result.end_date       # nil
-    result.end_time       # nil
-    result.purchase_token # "some-purchase-token"
+```ruby
+result = client.verify 'some-user-id', 'some-purchase-token'
+
+result.class.name     # "Amazon::Iap::Result"
+result.item_type      # "SUBSCRIPTION"
+result.sku            # "some-sku"
+result.start_date     # 1378751554943
+result.start_time     # 2013-09-09 14:32:34 -0400 
+result.end_date       # nil
+result.end_time       # nil
+result.purchase_token # "some-purchase-token"
+```
 
 <!-- -->
- 
-    result = client.renew 'some-user-id', 'some-purchase-token'
-    
-    result.class.name     # "Amazon::Iap::Result"
-    result.purchase_token # "some-new-purchase-token"
+
+```ruby
+result = client.renew 'some-user-id', 'some-purchase-token'
+
+result.class.name     # "Amazon::Iap::Result"
+result.purchase_token # "some-new-purchase-token"
+```
 
 ## Exception Handling
 
@@ -72,11 +83,13 @@ a distinct exception.  Take a look at the [Amazon::Iap::Result class](lib/amazon
 
 Example exception handling:
 
-    begin
-      result = client.verify 'some-user-id', 'some-purchase-token'
-    rescue Amazon::Iap::Exceptions::InternalError => e
-      # enqueue to try again later
-    end
+```ruby
+begin
+  result = client.verify 'some-user-id', 'some-purchase-token'
+rescue Amazon::Iap::Exceptions::InternalError => e
+  # enqueue to try again later
+end
+```
 
 ## Contributing
 
