@@ -91,6 +91,19 @@ rescue Amazon::Iap::Exceptions::InternalError => e
 end
 ```
 
+For convenience, all exceptions inherit from `Amazon::Iap::Exceptions::Exception` so you can rescue from
+any exception (or as a default):
+
+```ruby
+begin
+  result = client.verify 'some-user-id', 'some-purchase-token'
+rescue Amazon::Iap::Exceptions::InternalError => e
+  # enqueue to try again later
+rescue Amazon::Iap::Exceptions::Exception => e
+  # log the exception
+end
+```
+
 ## Contributing
 
 1. Fork it
