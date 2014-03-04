@@ -5,9 +5,8 @@ class Amazon::Iap::Client
   PRODUCTION_HOST = 'https://appstore-sdk.amazon.com'
   
   def initialize(developer_secret, host=nil)
-    host ||= PRODUCTION_HOST
     @developer_secret = developer_secret
-    @host = host
+    @host = host || PRODUCTION_HOST
   end
   
   def verify(user_id, purchase_token, renew_on_failure=true)
@@ -30,6 +29,8 @@ class Amazon::Iap::Client
   def process(path, user_id, purchase_token)
     path = "/version/2.0/#{path}/developer/#{@developer_secret}/user/#{user_id}/purchaseToken/#{purchase_token}"
     uri = URI.parse "#{@host}#{path}"
-    Amazon::Iap::Result.new Net::HTTP.get_response(uri)
+    req = Net::HTTP::Get.new uri.request_uri
+    res = Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') { |http| http.request req }
+    Amazon::Iap::Result.new res
   end  
 end
