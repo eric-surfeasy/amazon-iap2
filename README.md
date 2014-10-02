@@ -1,14 +1,14 @@
 # Amazon::Iap
 
 This gem is a simple implementation of the Amazon receipt verfication service outlined
-[here](https://developer.amazon.com/sdk/in-app-purchasing/documentation/rvs.html).
+[here](https://developer.amazon.com/sdk/in-app-purchasing/documentation/rvs.html) with migrations from [here](https://developer.amazon.com/public/apis/earn/in-app-purchasing/docs-v2/verifying-receipts-in-iap-2.0)
 
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'amazon-iap'
+    gem 'amazon-iap2'
 
 And then execute:
 
@@ -16,7 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install amazon-iap
+    $ gem install amazon-iap2
 
 ## Usage
 
@@ -33,73 +33,53 @@ client = Amazon::Iap::Client.new 'my_developer_secret', 'http://iap-staging.doma
 client = Amazon::Iap::Client.new 'my_developer_secret' # production server
 ```
 
-From there, you can call either `verify` or `renew` on the client and pass in the user id and purchase token:
-
-```ruby
-result = client.verify 'some-user-id', 'some-purchase-token'
-result = client.renew 'some-user-id', 'some-purchase-token'
-```
-
-By default, the `verify` method will automatically try to renew expired tokens, and will recall `verify`
-against the new token returned.  If you do not want this behavior, simply pass in `false` as the third
-attribute to the `verify` method:
-
-```ruby
-result = client.verify 'some-user-id', 'some-purchase-token', false
-```
 
 ## Returned Values
 
-An instance of Amazon::Iap::Result is returned from both methods, the attributes being the underscored versions
-of the hash keys returned in the JSON object.  For convenience, we also add `start_time` and `end_time` attributes
-which are `Time` representations of the milliseconds returned in `start_date` and `end_date` respectively.  E.g.,
+An instance of Amazon::Iap2::Result is returned from both methods, the attributes being the underscored versions
+of the hash keys returned in the JSON object.  For convenience, we also add `purchase_time` and `cancel_time` attributes
+which are `Time` representations of the milliseconds returned in `cancel_date` and `cancel_date` respectively.  E.g.,
 
 ```ruby
-result = client.verify 'some-user-id', 'some-purchase-token'
+result = client.verify 'some-user-id', 'some-receipt-id'
 
-result.class.name     # "Amazon::Iap::Result"
-result.item_type      # "SUBSCRIPTION"
-result.sku            # "some-sku"
-result.start_date     # 1378751554943
-result.start_time     # 2013-09-09 14:32:34 -0400 
-result.end_date       # nil
-result.end_time       # nil
-result.purchase_token # "some-purchase-token"
-```
-
-<!-- -->
-
-```ruby
-result = client.renew 'some-user-id', 'some-purchase-token'
-
-result.class.name     # "Amazon::Iap::Result"
-result.purchase_token # "some-new-purchase-token"
+result.class.name        # "Amazon::Iap2::Result"
+result.product_type      # "SUBSCRIPTION"
+result.product_id        # "some-sku"
+result.parent_product_id # nil
+result.purchase_date     # 1378751554943
+result.purchase_time     # 2013-09-09 14:32:34 -0400 
+result.cancel_date       # nil
+result.cancel_time       # nil
+result.quantity          # 1
+result.test_transaction  # false
+result.beta_product      # false
 ```
 
 ## Exception Handling
 
 Any non-200 status code will raise an exception.  For convenience in internal controls, each status code raises
-a distinct exception.  Take a look at the [Amazon::Iap::Result class](lib/amazon/iap/result.rb) for specifics.
+a distinct exception.  Take a look at the [Amazon::Iap2::Result class](lib/amazon/iap2/result.rb) for specifics.
 
 Example exception handling:
 
 ```ruby
 begin
-  result = client.verify 'some-user-id', 'some-purchase-token'
-rescue Amazon::Iap::Exceptions::InternalError => e
+  result = client.verify 'some-user-id', 'some-receipt-id'
+rescue Amazon::Iap2::Exceptions::InternalError => e
   # enqueue to try again later
 end
 ```
 
-For convenience, all exceptions inherit from `Amazon::Iap::Exceptions::Exception` so you can rescue from
+For convenience, all exceptions inherit from `Amazon::Iap2::Exceptions::Exception` so you can rescue from
 any exception (or as a default):
 
 ```ruby
 begin
-  result = client.verify 'some-user-id', 'some-purchase-token'
-rescue Amazon::Iap::Exceptions::InternalError => e
+  result = client.verify 'some-user-id', 'receipt-id'
+rescue Amazon::Iap2::Exceptions::InternalError => e
   # enqueue to try again later
-rescue Amazon::Iap::Exceptions::Exception => e
+rescue Amazon::Iap2::Exceptions::Exception => e
   # log the exception
 end
 ```
