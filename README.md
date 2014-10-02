@@ -1,4 +1,4 @@
-# Amazon::Iap
+# Amazon::Iap2
 
 This gem is a simple implementation of the Amazon receipt verfication service outlined
 [here](https://developer.amazon.com/sdk/in-app-purchasing/documentation/rvs.html) with migrations from [here](https://developer.amazon.com/public/apis/earn/in-app-purchasing/docs-v2/verifying-receipts-in-iap-2.0)
